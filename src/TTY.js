@@ -11,9 +11,43 @@ initialTTYOpen('http://localhost:8090/');
 
 export default class TTY extends Component {
   componentDidMount(){
-    setTimeout(() => {
-      this._mkWindow();
-    }, 1000);
+    this._mkWindow();
+
+    let s = {};
+    
+    let fix_size = false;
+
+    function resize_to_size(){
+      console.log('resize!');
+      this._syncWindowSize();
+    }
+
+    function check_resize(){
+      if (this.tty.clientWidth !== s.last_width || s.last_height !== this.tty.client_height){
+        resize_to_size.bind(this)();
+      }
+
+      s.last_width = this.tty.clientWidth;
+      s.last_height = this.tty.clientHeight;
+    }
+
+    function add_mutation_resize_check(elem){
+      (new MutationObserver(function(mutations){
+          if(mutations.length > 0) { 
+            check_resize.bind(this)(); 
+          }
+      }.bind(this))).observe(elem, { attributes : true, attributeFilter : ['style'] });
+    }
+
+    if (!fix_size){
+      window.addEventListener('resize', check_resize.bind(this));
+      var elem = this.tty;
+      do {
+        add_mutation_resize_check.bind(this)(elem);
+        elem = elem.parentNode;
+      } while (elem != null);
+    }
+
   }
   _syncWindowSize(){
     var oldWidth = this._win.element.clientWidth;

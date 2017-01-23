@@ -18,7 +18,6 @@ export default class TTY extends Component {
     let fix_size = false;
 
     function resize_to_size(){
-      console.log('resize!');
       this._syncWindowSize();
     }
 
@@ -89,7 +88,7 @@ export default class TTY extends Component {
 
     this._syncWindowSize()
 
-    win.on('close', function(){
+    tty.on('reset', function(){
       this._mkWindow();
     }.bind(this));
   }

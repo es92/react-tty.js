@@ -53,6 +53,10 @@ export default class TTY extends Component {
     }
 
   }
+  componentWillUnmount() {
+    this._closed = true;
+    this._win.destroy();
+  }
   _syncWindowSize(){
     var oldWidth = this._win.element.clientWidth;
     var oldHeight = this._win.element.clientHeight;
@@ -98,7 +102,8 @@ export default class TTY extends Component {
     }.bind(this));
 
     win.on('close', function(){
-      this.props.onClose();
+      if (!this._closed)
+        this.props.onClose();
     }.bind(this));
   }
   render(){

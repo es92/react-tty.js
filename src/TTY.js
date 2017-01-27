@@ -7,10 +7,15 @@ import './style.css'
 
 let [ tty, initialTTYOpen ] = getTTY();
 
+export function _getTTY(){
+  return tty;
+}
+
 initialTTYOpen('http://localhost:8090/');
 
 export default class TTY extends Component {
   componentDidMount(){
+
     this._mkWindow();
 
     let s = {};
@@ -90,6 +95,10 @@ export default class TTY extends Component {
 
     tty.on('reset', function(){
       this._mkWindow();
+    }.bind(this));
+
+    win.on('close', function(){
+      this.props.onClose();
     }.bind(this));
   }
   render(){

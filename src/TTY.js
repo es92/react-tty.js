@@ -27,7 +27,7 @@ export default class TTY extends Component {
     }
 
     function check_resize(){
-      if (this.tty.clientWidth !== s.last_width || s.last_height !== this.tty.client_height){
+      if (this.tty.clientWidth !== s.last_width || s.last_height !== this.tty.clientHeight){
         resize_to_size.bind(this)();
       }
 
@@ -37,14 +37,16 @@ export default class TTY extends Component {
 
     function add_mutation_resize_check(elem){
       (new MutationObserver(function(mutations){
-          if(mutations.length > 0) { 
+          if (mutations.length > 0) { 
             check_resize.bind(this)(); 
           }
       }.bind(this))).observe(elem, { attributes : true, attributeFilter : ['style'] });
     }
 
+    this.window_resize_listener = check_resize.bind(this)
+
     if (!fix_size){
-      window.addEventListener('resize', check_resize.bind(this));
+      window.addEventListener('resize', this.window_resize_listener);
       var elem = this.tty;
       do {
         add_mutation_resize_check.bind(this)(elem);
@@ -56,19 +58,17 @@ export default class TTY extends Component {
   componentWillUnmount() {
     this._closed = true;
     this._win.destroy();
+    window.removeEventListener('resize', this.window_resize_listener);
   }
   _syncWindowSize(){
-    var oldWidth = this._win.element.clientWidth;
-    var oldHeight = this._win.element.clientHeight;
-
-    var oldCols = this._win.cols;
-    var oldRows = this._win.rows;
-
     var newHeight = this.tty.clientHeight;
     var newWidth = this.tty.clientWidth;
 
-    var newCols = Math.floor(newWidth / oldWidth * oldCols);
-    var newRows = Math.floor(newHeight / oldHeight * oldRows);
+    let lostHeight = 15 + 10;
+    let lostWidth = 10;
+
+    var newCols = Math.floor((newWidth - lostWidth) / this.pix_per_col);
+    var newRows = Math.floor((newHeight - lostHeight) / this.pix_per_row);
 
     this._win.resize(newCols, newRows);
   }
@@ -94,6 +94,10 @@ export default class TTY extends Component {
     var isIPhone = ~navigator.userAgent.indexOf('iPhone');
     if (isIPhone)
       win.element.classList.add('ios-term');
+
+
+    this.pix_per_col = this._win.element.clientWidth / this._win.cols;
+    this.pix_per_row = this._win.element.clientHeight / this._win.rows;
 
     this._syncWindowSize()
 

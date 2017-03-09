@@ -285,7 +285,7 @@ Window.prototype.bind = function() {
     }
     last = new Date;
 
-    self.drag(ev);
+    //self.drag(ev);
 
     return cancel(ev);
   });

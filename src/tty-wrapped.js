@@ -44,13 +44,14 @@ tty.elements;
  * Open
  */
 
-tty.open = function(path) {
+tty.open = function(path, username, password) {
   if (document.location.pathname) {
     var parts = document.location.pathname.split('/')
       , base = parts.slice(0, parts.length - 1).join('/') + '/'
       , resource = base.substring(1) + 'socket.io';
 
-    tty.socket = io.connect(path, { resource: resource });
+    tty.socket = io.connect(path, { resource: resource, query: 'auth=' + btoa(btoa(username) + ':' + btoa(password)) });
+
   } else {
     tty.socket = io.connect('http://localhost:8090/');
   }

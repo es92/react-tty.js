@@ -5,16 +5,26 @@ import getTTY from './tty-wrapped.js'
 
 import './style.css'
 
-let [ tty, initialTTYOpen ] = getTTY();
+let path_to_tty = {}
 
-export function _getTTY(){
-  return tty;
+export function _getTTY(path){
+  return path_to_tty[path];
 }
 
-initialTTYOpen('http://localhost:8090/');
+export function _initTTY(path, username, password){
+  let [ tty, initialTTYOpen ] = getTTY();
+  path_to_tty[path] = tty;
+  initialTTYOpen(path, username, password);
+}
 
 export default class TTY extends Component {
   componentDidMount(){
+
+    if (path_to_tty[this.props.config.url] == null){
+      _initTTY(this.props.config.url, this.props.config.username, this.props.config.password);
+    }
+
+    this.tty_connection = path_to_tty[this.props.config.url];
 
     this._mkWindow();
 
@@ -79,8 +89,11 @@ export default class TTY extends Component {
   keypress(charCode){
     this._win.focused.keyPress({ charCode: charCode })
   }
+  _setTTY(tty){
+    this.tty = tty;
+  }
   _mkWindow(){
-    var win = new tty.Window();
+    var win = new this.tty_connection.Window();
     this._win = win;
 
     win.element.parentNode.removeChild(win.element);
@@ -88,20 +101,17 @@ export default class TTY extends Component {
     var grip = win.element.querySelector('.grip');
     grip.parentNode.removeChild(grip);
 
-    this.tty.appendChild(win.element);
-    //win.element.querySelector('.terminal').setAttribute("contenteditable", "true");
 
     var isIPhone = ~navigator.userAgent.indexOf('iPhone');
     if (isIPhone)
       win.element.classList.add('ios-term');
 
-
+    this.tty.appendChild(win.element);
     this.pix_per_col = this._win.element.clientWidth / this._win.cols;
     this.pix_per_row = this._win.element.clientHeight / this._win.rows;
-
     this._syncWindowSize()
 
-    tty.on('reset', function(){
+    this.tty_connection.on('reset', function(){
       this._mkWindow();
     }.bind(this));
 
@@ -111,7 +121,7 @@ export default class TTY extends Component {
     }.bind(this));
   }
   render(){
-    return <div ref={ (r) => this.tty = r } className="tty" style={{position: 'absolute', 'left': 0, 'right': 0, top: 0, bottom: 0 }}>
+    return <div ref={ (r) => this._setTTY(r) } className="tty" style={{position: 'absolute', 'left': 0, 'right': 0, top: 0, bottom: 0 }}>
            </div>
   }
 }

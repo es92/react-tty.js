@@ -15,6 +15,8 @@ let styleConfig = {
     family: '"DejaVu Sans Mono", "Liberation Mono", monospace',
     size: '12px'
   },
+  foregroundColor: '#f0f0f0',
+  backgroundColor: '#000'
 }
 
 class App extends Component {

@@ -99,10 +99,14 @@ export default class TTY extends Component {
     var win = new this.tty_connection.Window();
     this._win = win;
 
-    this.setState({ bg_color: win.element.querySelector('.terminal').style.backgroundColor });
-    win.element.style.border = 'none';
     win.element.style.fontFamily = this.props.styleConfig.font.family;
     win.element.querySelector('.terminal').style.fontSize = this.props.styleConfig.font.size;
+    win.element.querySelector('.terminal').style.color = this.props.styleConfig.foregroundColor;
+    win.element.querySelector('.terminal').style.backgroundColor = this.props.styleConfig.backgroundColor;
+
+    this.setState({ bg_color: win.element.querySelector('.terminal').style.backgroundColor });
+    win.element.style.border = 'none';
+    win.element.querySelector('.terminal').style.border = 'none';
 
     win.element.parentNode.removeChild(win.element);
 

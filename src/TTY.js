@@ -101,6 +101,8 @@ export default class TTY extends Component {
 
     this.setState({ bg_color: win.element.querySelector('.terminal').style.backgroundColor });
     win.element.style.border = 'none';
+    win.element.style.fontFamily = this.props.styleConfig.font.family;
+    win.element.querySelector('.terminal').style.fontSize = this.props.styleConfig.font.size;
 
     win.element.parentNode.removeChild(win.element);
 

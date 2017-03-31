@@ -18,6 +18,9 @@ export function _initTTY(path, username, password){
 }
 
 export default class TTY extends Component {
+  state = {
+    bg_color: 'white'
+  }
   componentDidMount(){
 
     if (path_to_tty[this.props.config.url] == null){
@@ -96,6 +99,9 @@ export default class TTY extends Component {
     var win = new this.tty_connection.Window();
     this._win = win;
 
+    this.setState({ bg_color: win.element.querySelector('.terminal').style.backgroundColor });
+    win.element.style.border = 'none';
+
     win.element.parentNode.removeChild(win.element);
 
     var grip = win.element.querySelector('.grip');
@@ -121,7 +127,12 @@ export default class TTY extends Component {
     }.bind(this));
   }
   render(){
-    return <div ref={ (r) => this._setTTY(r) } className="tty" style={{position: 'absolute', 'left': 0, 'right': 0, top: 0, bottom: 0 }}>
+    return <div ref={ (r) => this._setTTY(r) } className="tty" style={{position: 'absolute', 
+                                                                       'left': 0, 
+                                                                       'right': 0,
+                                                                        top: 0, 
+                                                                        bottom: 0,
+                                                                         backgroundColor: this.state.bg_color }}>
            </div>
   }
 }

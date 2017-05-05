@@ -49,20 +49,24 @@ export default class TTY extends Component {
     }
 
     function add_mutation_resize_check(elem){
-      (new MutationObserver(function(mutations){
+      let mo = new MutationObserver(function(mutations){
           if (mutations.length > 0) { 
             check_resize.bind(this)(); 
           }
-      }.bind(this))).observe(elem, { attributes : true, attributeFilter : ['style'] });
+      }.bind(this));
+      mo.observe(elem, { attributes : true, attributeFilter : ['style'] });
+      return mo
     }
 
     this.window_resize_listener = check_resize.bind(this)
 
+    this.mutation_resizers = [];
     if (!fix_size){
       window.addEventListener('resize', this.window_resize_listener);
       var elem = this.tty;
       do {
-        add_mutation_resize_check.bind(this)(elem);
+        let mo = add_mutation_resize_check.bind(this)(elem);
+        this.mutation_resizers.push(mo);
         elem = elem.parentNode;
       } while (elem != null);
     }
@@ -71,6 +75,7 @@ export default class TTY extends Component {
   componentWillUnmount() {
     this._closed = true;
     this._win.destroy();
+    this.mutation_resizers.forEach((m) => m.disconnect());
     window.removeEventListener('resize', this.window_resize_listener);
   }
   _syncWindowSize(){

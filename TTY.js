@@ -94,20 +94,24 @@ var TTY = function (_Component) {
       }
 
       function add_mutation_resize_check(elem) {
-        new MutationObserver(function (mutations) {
+        var mo = new MutationObserver(function (mutations) {
           if (mutations.length > 0) {
             check_resize.bind(this)();
           }
-        }.bind(this)).observe(elem, { attributes: true, attributeFilter: ['style'] });
+        }.bind(this));
+        mo.observe(elem, { attributes: true, attributeFilter: ['style'] });
+        return mo;
       }
 
       this.window_resize_listener = check_resize.bind(this);
 
+      this.mutation_resizers = [];
       if (!fix_size) {
         window.addEventListener('resize', this.window_resize_listener);
         var elem = this.tty;
         do {
-          add_mutation_resize_check.bind(this)(elem);
+          var mo = add_mutation_resize_check.bind(this)(elem);
+          this.mutation_resizers.push(mo);
           elem = elem.parentNode;
         } while (elem != null);
       }
@@ -117,6 +121,9 @@ var TTY = function (_Component) {
     value: function componentWillUnmount() {
       this._closed = true;
       this._win.destroy();
+      this.mutation_resizers.forEach(function (m) {
+        return m.disconnect();
+      });
       window.removeEventListener('resize', this.window_resize_listener);
     }
   }, {
